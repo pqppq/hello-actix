@@ -48,8 +48,8 @@ fn scoped_config(cfg: &mut web::ServiceConfig) {
 fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::resource("/app2")
-        .route(web::get().to(|| async { HttpResponse::Ok().body("app2") }))
-        .route(web::head().to(HttpResponse::MethodNotAllowed))
+            .route(web::get().to(|| async { HttpResponse::Ok().body("app2") }))
+            .route(web::head().to(HttpResponse::MethodNotAllowed)),
     );
 }
 
@@ -65,15 +65,14 @@ async fn main() -> std::io::Result<()> {
                 app_name: String::from("Actix web"),
             }))
             .app_data(counter.clone())
+            // /app2
             .configure(config)
+            // /api/test
             .service(web::scope("/api").configure(scoped_config))
-            .service(
-                web::scope("/")
-                    .service(index)
-                    .service(hello)
-                    .service(echo)
-                    .route("/hey", web::get().to(manual_hello)),
-            )
+            .service(index)
+            .service(hello)
+            .service(echo)
+            .route("/hey", web::get().to(manual_hello))
             .service(
                 // in /app scope(same url path prefix)
                 web::scope("/app")
